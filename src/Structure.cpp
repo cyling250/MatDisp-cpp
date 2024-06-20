@@ -1,12 +1,13 @@
 #include"Structure.h"
 #include"Mat.h"
+#include <windows.h>
 
 bool isSplice(Node* node, const std::set<Element*>& elements) {
     for (const auto& element : elements) {
         if (element->nodes[0] != node & element->nodes[1] != node)
             throw std::runtime_error("element not includes node");
         int idx = element->nodes[0] == node ? 0 : 1;
-        if (element->linkWay[idx]) return false;
+        if (!element->linkWay[idx]) return false;
     }
     return true;
 }
@@ -30,7 +31,7 @@ Element* Structure::link(
 
 std::map<Node*, std::set<Element*>> Structure::getLinkDict() {
     std::map<Node*, std::set<Element*>> linkDict;
-    for (Element element : this->elements) {
+    for (const Element& element : this->elements) {
         // 如果没有找到
         if (linkDict.find(element.nodes[0]) == linkDict.end()) {
             linkDict[element.nodes[0]] = std::set<Element*>();
@@ -38,8 +39,8 @@ std::map<Node*, std::set<Element*>> Structure::getLinkDict() {
         if (linkDict.find(element.nodes[1]) == linkDict.end()) {
             linkDict[element.nodes[1]] = std::set<Element*>();
         }
-        linkDict[element.nodes[0]].insert(&element);
-        linkDict[element.nodes[1]].insert(&element);
+        linkDict[element.nodes[0]].insert((Element*) &element);
+        linkDict[element.nodes[1]].insert((Element*) &element);
     }
     return linkDict;
 }
@@ -49,10 +50,9 @@ int Structure::getFreedom() {
     std::map<Node*, std::set<Element*>> linkDict = getLinkDict();
     for (const auto& entity : linkDict) {
         Node* node = entity.first;
-        std::set<Element*> tempElements = entity.second;
-        int linkTemp = 0 - isSplice(node, tempElements);
-        for (auto element : tempElements) {
-            int i = element->nodes[1] == node;
+        int linkTemp = 0 - isSplice(entity.first, entity.second);
+        for (auto element : entity.second) {
+            int i = element->nodes[1] == entity.first;
             if (element->linkWay[i]) {
                 linkTemp++;
                 element->freedom[i * 3 + 0] = freedom;
@@ -90,7 +90,8 @@ const std::vector<std::vector<double>>* Structure::getEntireK(bool forceCalc) {
 void Structure::loadProcess() {
     this->load = std::vector<double>(this->sizeOfK);
     // 先处理节点荷载
-    for (const auto& entity : getLinkDict()) {
+    std::map<Node*, std::set<Element*>> linkDict = getLinkDict();
+    for (const auto& entity : linkDict) {
         for (int i = 0; i < 3; i++) {
             Node* node = entity.first;
             this->load[node->freedom[i]] += node->load[i]; // 节点不需要反号

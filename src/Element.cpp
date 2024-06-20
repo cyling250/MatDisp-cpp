@@ -43,7 +43,7 @@ Element::Element(
             {0, 0, 0, 0, 0, 1}
     }; // 坐标变换矩阵
 
-    this->globalKe = this->T * this->getLocalKe() * this->T; // 计算整体坐标系下单元刚度矩阵
+    this->globalKe = transpose(this->T) * this->getLocalKe() * this->T; // 计算整体坐标系下单元刚度矩阵
 
     this->idx = Element::index;
     Element::count++;
@@ -90,10 +90,11 @@ double Element::getLength() {
         // 如果未计算L
         this->L = sqrt(
                 pow((this->nodes[0]->x - this->nodes[1]->x), 2) +
-                        pow((this->nodes[0]->x - this->nodes[1]->x), 2)
+                        pow((this->nodes[0]->y - this->nodes[1]->y), 2)
         );
     }
-    if (this->L == 0)throw std::runtime_error("invalid element with length 0");
+    if (this->L == 0)
+        throw std::runtime_error("invalid element with length 0");
     return this->L;
 }
 

@@ -1,33 +1,27 @@
 #include<iostream>
 #include"Structure.h"
-#include<vector>
+#include"Mat.h"
+#include<cmath>
 
 using namespace std;
 
 int main() {
-//    Structure s;
-//    Node n1(0, 0);
-//    Node n2(2, 0);
-//    Node n3(3, 0);
-//    Node n4(5, 0);
-//    s.link(&n1, &n2);
-//    s.link(&n2, &n3, false, true);
-//    s.link(&n3, &n4, true);
-//    for (int i = 0; i < 3; i++) {
-//        elements[i].print();
-//    }
-//    elements[0].add_restrain(vector < int > {-1, -1, -1, -1, -1, 0});
-//    elements[1].add_restrain(vector < int > {-1, -1, 0, -1, -1, 0});
-//    elements[2].add_restrain(vector < int > {-1, -1, 0, -1, -1, -1});
-//    elements[1].set_load(vector < double > {0, 2, 1});
-//    elements[0].set_load(vector < double > {2, 1});
-//    s.get_freedom();
-//    s.get_K();
-//    s.get_load();
-//    s.add_restrain();
-//    print(s.K);
-//    print(s.load);
-    Element e1({1, 2}, {2, 4});
-    cout << e1 << endl;
+    Structure s;
+    Node n1(0, 0), n2(12, 0), n3(0, 6), n4(12, 6);
+    Element* e1 = s.link(&n1, &n2, false, false, 6.94 * pow(10, -3) * 12 * 12, 1.0 / 12, 0.63);
+    Element* e2 = s.link(&n1, &n3, false, false, 6.94 * pow(10, -3) * 24 * 6, 1.0 / 24, 0.5);
+    Element* e3 = s.link(&n2, &n4, false, false, 6.94 * pow(10, -3) * 24 * 6, 1.0 / 24, 0.5);
+    e2->addRestrain({false, false, false, true, true, true});
+    e3->addRestrain({false, false, false, true, true, true});
+    e2->addLoad({2, 1});
+
+    s.getFreedom();
+    s.loadProcess();
+    s.getEntireK();
+    s.freedomProcess();
+    cout << "K:\n" << s.K << endl;
+    cout << "clacK:\n" << s.calcK << endl;
+    cout << "load:\n" << s.load << endl;
+    cout << "calcLoad:\n" << s.calcLoad << endl;
     return 0;
 }
